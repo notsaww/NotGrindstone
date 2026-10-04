@@ -1,0 +1,6 @@
+{
+  "container.notgrindstone.grindstone": "Grindstone",
+  "notgrindstone.button.remove_all": "Remove all enchantments",
+  "notgrindstone.button.remove_selected": "Remove selected enchantments",
+  "notgrindstone.button.nothing_selected": "Select enchantments to remove first!"
+}

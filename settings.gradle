@@ -7,3 +7,17 @@ pluginManagement {
 }
 
 rootProject.name = "NotGrindstone"
+
+// Every supported Minecraft line gets its own subproject that produces its own jar.
+// Sources are shared through the `shared/` folder (see gradle/mod.gradle).
+[
+        '1.21.11',
+        '26.1',
+        '26.1.1',
+        '26.1.2',
+        '26.2',
+        '26.3',
+].each { version ->
+    include ":versions:${version}"
+    project(":versions:${version}").projectDir = file("versions/${version}")
+}
