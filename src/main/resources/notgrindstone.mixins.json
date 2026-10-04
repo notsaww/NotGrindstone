@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "ru.notsaww.notgrindstone.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "notgrindstone-refmap.json",
+  "mixins": [
+    "GrindstoneBlockMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

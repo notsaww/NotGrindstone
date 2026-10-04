@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "notgrindstone",
+  "version": "1.0",
+  "name": "NotGrindstone",
+  "description": "Overhauls the grindstone UI allowing selective enchantment removal including curses.",
+  "authors": ["notsaww"],
+  "contact": {},
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "ru.notsaww.notgrindstone.NotGrindstone"
+    ]
+  },
+  "mixins": [
+    "notgrindstone.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
