@@ -1,0 +1,10 @@
+{
+  "container.notgrindstone.grindstone": "Точило",
+  "notgrindstone.button.remove_all": "Снять все зачарования",
+  "notgrindstone.button.remove_selected": "Снять выбранные чары",
+  "notgrindstone.button.nothing_selected": "Сначала выбери что убрать!",
+  "advancements.notgrindstone.grindstone_disenchant.title": "Пальця об палець не вдарю",
+  "advancements.notgrindstone.grindstone_disenchant.description": "Зніміть зачарування на точильному камені",
+  "advancements.notgrindstone.back_to_basics.title": "Зняти останні штани",
+  "advancements.notgrindstone.back_to_basics.description": "Зніміть 3 зачарування за один раз з одного предмета на точильному камені"
+}

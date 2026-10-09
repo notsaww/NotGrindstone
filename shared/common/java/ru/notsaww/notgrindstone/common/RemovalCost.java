@@ -2,15 +2,16 @@ package ru.notsaww.notgrindstone.common;
 
 import java.util.Random;
 
-/**
- * Experience cost of stripping enchantments, same formula vanilla grindstone uses:
- * every enchantment level contributes a random amount of 1 to 5 points.
- */
 public final class RemovalCost {
 
     private RemovalCost() {
     }
 
+    /**
+     * @return the experience a removal is worth, or {@code 0} when no enchantment was removed.
+     * Never returns {@code 0} for a non empty set of removed enchantments, so stripping an
+     * enchantment always pays out at least one point.
+     */
     public static int forLevels(int[] levels, Random random) {
         int total = 0;
         for (int level : levels) {
@@ -18,6 +19,6 @@ public final class RemovalCost {
                 total += random.nextInt(5) + 1;
             }
         }
-        return total;
+        return levels.length == 0 ? 0 : Math.max(1, total);
     }
 }

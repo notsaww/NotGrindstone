@@ -30,7 +30,7 @@ public class GrindstoneBlockMixin {
 
             @Override
             public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-                return new CustomGrindstoneScreenHandler(syncId, playerInventory);
+                return new CustomGrindstoneScreenHandler(syncId, playerInventory, world, pos.toImmutable());
             }
         };
 

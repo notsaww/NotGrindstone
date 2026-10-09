@@ -1,0 +1,51 @@
+
+apply plugin: 'java'
+
+def prop = { String key, Object fallback = null ->
+    project.hasProperty(key) ? project.property(key) : fallback
+}
+
+def mcVersion = prop('mc.version')
+def paperApi = prop('mc.paperApi')
+def javaRelease = prop('mc.javaRelease') as int
+
+group = rootProject.property('maven_group')
+version = "${rootProject.property('mod_version')}+mc${mcVersion}"
+
+base {
+    archivesName = "${rootProject.property('archives_base_name')}-plugin-${mcVersion}"
+}
+
+repositories {
+    maven {
+        name = 'papermc'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly "io.papermc.paper:paper-api:${paperApi}"
+}
+
+sourceSets.main.java.srcDir rootProject.file('Plugin/shared/java')
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = javaRelease
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Jar).configureEach {
+    def license = rootProject.file('LICENSE.txt')
+    if (license.exists()) {
+        from(license) { rename { "${it}_${rootProject.property('archives_base_name')}" } }
+    }
+}
+
+processResources {
+    def tokens = [version: project.version.toString()]
+    inputs.properties(tokens)
+    filesMatching('plugin.yml') {
+        expand tokens
+    }
+}

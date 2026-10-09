@@ -1,0 +1,7 @@
+name: NotGrindstone
+version: '${version}'
+main: ru.notsaww.notgrindstone.plugin.NotGrindstonePlugin
+api-version: '26.2'
+description: Overhauls the grindstone, allowing selective enchantment removal including curses.
+author: notsaww
+website: https://github.com/notsaww/NotGrindstone

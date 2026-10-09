@@ -4,10 +4,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Slot layout of the overhauled grindstone screen. Shared by every Minecraft version,
- * the version specific handlers only translate these indices into their own API.
- */
 public final class GrindstoneLayout {
 
     public static final int COLUMNS = 9;
@@ -48,9 +44,6 @@ public final class GrindstoneLayout {
         return enchantIndexOfSlot(slotIndex) >= 0;
     }
 
-    /**
-     * @return index into {@link #ENCHANT_SLOTS}, or -1 when the slot is not an enchantment slot
-     */
     public static int enchantIndexOfSlot(int slotIndex) {
         for (int i = 0; i < ENCHANT_SLOTS.length; i++) {
             if (ENCHANT_SLOTS[i] == slotIndex) {

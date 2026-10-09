@@ -10,14 +10,6 @@ import net.minecraft.world.item.component.TooltipDisplay;
 
 import java.util.LinkedHashSet;
 
-/**
- * Stained glass panes the fake GUI is drawn with. Their tooltip is suppressed so the filler
- * slots stay blank.
- *
- * <p>The panes are resolved through the registry on purpose: up to 26.1 Minecraft exposes one
- * {@code Items.<COLOR>_STAINED_GLASS_PANE} constant per colour, from 26.2 on it exposes a single
- * {@code Items.STAINED_GLASS_PANE} colour collection instead.
- */
 final class GlassPanes {
 
     private static final TooltipDisplay NO_TOOLTIP = new TooltipDisplay(true,

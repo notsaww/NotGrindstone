@@ -1,0 +1,10 @@
+{
+  "container.notgrindstone.grindstone": "Тостық тас",
+  "notgrindstone.button.remove_all": "Барлық сиқырларды алып тастау",
+  "notgrindstone.button.remove_selected": "Таңдалған сиқырларды алып тастау",
+  "notgrindstone.button.nothing_selected": "Алдымен не алып тастау керек екенін таңда!",
+  "advancements.notgrindstone.grindstone_disenchant.title": "Мысақ саусаққа тимейсің",
+  "advancements.notgrindstone.grindstone_disenchant.description": "Тостық таста сиқырды алыңыз",
+  "advancements.notgrindstone.back_to_basics.title": "Соңғы шалбарды шешу",
+  "advancements.notgrindstone.back_to_basics.description": "Бір уақытта тостық таста бір заттан 3 сиқырды алыңыз"
+}

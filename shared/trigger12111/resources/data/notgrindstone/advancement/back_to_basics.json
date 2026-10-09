@@ -1,0 +1,30 @@
+{
+  "parent": "notgrindstone:grindstone_disenchant",
+  "criteria": {
+    "disenchanted_at_once": {
+      "conditions": {
+        "count": 3
+      },
+      "trigger": "notgrindstone:disenchanted_at_once"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.notgrindstone.back_to_basics.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "count": 1,
+      "id": "minecraft:experience_bottle"
+    },
+    "title": {
+      "translate": "advancements.notgrindstone.back_to_basics.title"
+    }
+  },
+  "requirements": [
+    [
+      "disenchanted_at_once"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

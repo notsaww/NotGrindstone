@@ -2,5 +2,9 @@
   "container.notgrindstone.grindstone": "Grindstone",
   "notgrindstone.button.remove_all": "Remove all enchantments",
   "notgrindstone.button.remove_selected": "Remove selected enchantments",
-  "notgrindstone.button.nothing_selected": "Select enchantments to remove first!"
+  "notgrindstone.button.nothing_selected": "Select enchantments to remove first!",
+  "advancements.notgrindstone.grindstone_disenchant.title": "Keep your nose to the grindstone",
+  "advancements.notgrindstone.grindstone_disenchant.description": "Remove the enchantment at a grindstone",
+  "advancements.notgrindstone.back_to_basics.title": "Back to Basics",
+  "advancements.notgrindstone.back_to_basics.description": "Remove 3 enchantments from a single item at once using a grindstone"
 }

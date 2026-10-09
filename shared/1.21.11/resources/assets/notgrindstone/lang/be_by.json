@@ -1,0 +1,10 @@
+{
+  "container.notgrindstone.grindstone": "Тачила",
+  "notgrindstone.button.remove_all": "Зняць усе зачараванні",
+  "notgrindstone.button.remove_selected": "Зняць абраныя чары",
+  "notgrindstone.button.nothing_selected": "Спачатку выберы, што ўбраць!",
+  "advancements.notgrindstone.grindstone_disenchant.title": "Пальцам ад пальца не ўдарыць",
+  "advancements.notgrindstone.grindstone_disenchant.description": "Зніміце зачараванне на камені",
+  "advancements.notgrindstone.back_to_basics.title": "Зняць апошнія штаны",
+  "advancements.notgrindstone.back_to_basics.description": "Зніміце 3 зачараванні за адзін раз з аднаго прадмета на камені"
+}

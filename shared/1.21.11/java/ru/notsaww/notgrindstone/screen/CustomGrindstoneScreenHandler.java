@@ -5,6 +5,7 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -17,10 +18,16 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
+import ru.notsaww.notgrindstone.advancement.NotGrindstoneCriteria;
 import ru.notsaww.notgrindstone.common.GrindstoneLayout;
 import ru.notsaww.notgrindstone.common.RemovalCost;
 import ru.notsaww.notgrindstone.common.UiText;
@@ -32,34 +39,46 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-/**
- * Replaces the vanilla grindstone menu with a 9x5 grid: one slot for the item, a list of
- * its enchantments that can be toggled individually, a "remove all" shortcut and a confirm
- * button that strips the selected enchantments for experience.
- */
 public class CustomGrindstoneScreenHandler extends GenericContainerScreenHandler {
 
     private static final Random RANDOM = new Random();
     private static final TooltipDisplayComponent NO_TOOLTIP = new TooltipDisplayComponent(true,
             LinkedHashSet.<ComponentType<?>>newLinkedHashSet(0));
 
+    /**
+     * {@code LevelEvents.GRINDSTONE_USE}, the very same level event vanilla fires so the client
+     * plays {@code block.grindstone.use} itself.
+     */
+    private static final int GRINDSTONE_USE_EVENT = 1042;
+
     private final SimpleInventory containerInventory;
     private final List<EnchantmentEntry> enchantmentEntries = new ArrayList<>();
     private final Set<Integer> selectedEnchantments = new HashSet<>();
+    private final World blockWorld;
+    private final BlockPos blockPos;
 
     public CustomGrindstoneScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, new SimpleInventory(GrindstoneLayout.CONTAINER_SIZE));
+        this(syncId, playerInventory, new SimpleInventory(GrindstoneLayout.CONTAINER_SIZE), null, null);
+    }
+
+    public CustomGrindstoneScreenHandler(int syncId, PlayerInventory playerInventory, World blockWorld, BlockPos blockPos) {
+        this(syncId, playerInventory, new SimpleInventory(GrindstoneLayout.CONTAINER_SIZE), blockWorld, blockPos);
     }
 
     public CustomGrindstoneScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
+        this(syncId, playerInventory, inventory, null, null);
+    }
+
+    public CustomGrindstoneScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory,
+                                         World blockWorld, BlockPos blockPos) {
         super(ScreenHandlerType.GENERIC_9X5, syncId, playerInventory, inventory, GrindstoneLayout.ROWS);
         this.containerInventory = (SimpleInventory) inventory;
+        this.blockWorld = blockWorld;
+        this.blockPos = blockPos;
 
         fillBackground();
         refresh();
     }
-
-    // --- fake GUI content ----------------------------------------------------
 
     private void fillBackground() {
         ItemStack filler = new ItemStack(Items.GRAY_STAINED_GLASS_PANE);
@@ -136,8 +155,6 @@ public class CustomGrindstoneScreenHandler extends GenericContainerScreenHandler
         containerInventory.setStack(GrindstoneLayout.CONFIRM_SLOT, pane);
     }
 
-    // --- input handling ------------------------------------------------------
-
     @Override
     public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
         boolean insideContainer = slotIndex >= 0 && slotIndex < GrindstoneLayout.CONTAINER_SIZE;
@@ -207,13 +224,17 @@ public class CustomGrindstoneScreenHandler extends GenericContainerScreenHandler
             return;
         }
 
-        int[] levels = enchantmentEntries.stream().mapToInt(EnchantmentEntry::level).toArray();
+        int removed = enchantments.getEnchantmentEntries().size() + storedEnchantments.getEnchantmentEntries().size();
+        int experience = RemovalCost.forLevels(levelsOf(enchantments, storedEnchantments), RANDOM);
+
+        finishRemoval(player, experience, removed);
+
         input.set(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
         input.set(DataComponentTypes.STORED_ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
+        containerInventory.setStack(GrindstoneLayout.ITEM_SLOT, toBookIfSpent(input));
 
         selectedEnchantments.clear();
         refresh();
-        finishRemoval(player, RemovalCost.forLevels(levels, RANDOM));
     }
 
     private void handleConfirm(PlayerEntity player) {
@@ -242,19 +263,89 @@ public class CustomGrindstoneScreenHandler extends GenericContainerScreenHandler
             }
         }
 
+        if (levels.isEmpty()) {
+            return;
+        }
+
+        finishRemoval(player, RemovalCost.forLevels(toIntArray(levels), RANDOM), levels.size());
+
         input.set(DataComponentTypes.ENCHANTMENTS, enchantments.build());
         input.set(DataComponentTypes.STORED_ENCHANTMENTS, storedEnchantments.build());
+        containerInventory.setStack(GrindstoneLayout.ITEM_SLOT, toBookIfSpent(input));
 
         selectedEnchantments.clear();
         refresh();
-        finishRemoval(player, RemovalCost.forLevels(toIntArray(levels), RANDOM));
     }
 
-    private void finishRemoval(PlayerEntity player, int experience) {
-        player.playSound(SoundEvents.BLOCK_GRINDSTONE_USE, 1.0F, 1.0F);
-        if (player instanceof ServerPlayerEntity serverPlayer && experience > 0) {
-            serverPlayer.addExperience(experience);
+    /**
+     * Reads the levels straight off the item so the payout can never depend on a stale view of the
+     * enchantment slots.
+     */
+    private static int[] levelsOf(ItemEnchantmentsComponent enchantments, ItemEnchantmentsComponent storedEnchantments) {
+        List<Integer> levels = new ArrayList<>();
+        collectLevels(enchantments, levels);
+        collectLevels(storedEnchantments, levels);
+        return toIntArray(levels);
+    }
+
+    private static void collectLevels(ItemEnchantmentsComponent enchantments, List<Integer> levels) {
+        for (var entry : enchantments.getEnchantmentEntries()) {
+            levels.add(entry.getIntValue());
         }
+    }
+
+    /**
+     * Vanilla turns an enchanted book back into a plain book once its last stored enchantment is
+     * gone, the overhauled grindstone has to do the same.
+     */
+    private static ItemStack toBookIfSpent(ItemStack stack) {
+        if (!stack.isOf(Items.ENCHANTED_BOOK)) {
+            return stack;
+        }
+        if (!stack.getOrDefault(DataComponentTypes.STORED_ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT).isEmpty()) {
+            return stack;
+        }
+        if (!stack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT).isEmpty()) {
+            return stack;
+        }
+        return stack.copyComponentsToNewStack(Items.BOOK, stack.getCount());
+    }
+
+    private void finishRemoval(PlayerEntity player, int experience, int removed) {
+        if (removed <= 0) {
+            return;
+        }
+
+        playUseSound(player);
+
+        if (player instanceof ServerPlayerEntity serverPlayer) {
+            awardExperience(serverPlayer, experience);
+            NotGrindstoneCriteria.triggerDisenchanted(serverPlayer, removed);
+        }
+    }
+
+    private void playUseSound(PlayerEntity player) {
+        // Vanilla fires level event 1042 here, which is the only path on which the client actually
+        // plays block.grindstone.use itself.
+        if (blockPos != null && blockWorld instanceof ServerWorld blockServer) {
+            blockServer.syncWorldEvent(null, GRINDSTONE_USE_EVENT, blockPos, 0);
+            return;
+        }
+
+        player.getEntityWorld().playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvents.BLOCK_GRINDSTONE_USE, SoundCategory.BLOCKS, 0.8F, 1.0F);
+    }
+
+    private void awardExperience(ServerPlayerEntity player, int experience) {
+        if (experience <= 0) {
+            return;
+        }
+
+        ServerWorld world = player.getEntityWorld();
+        Vec3d position = blockPos != null && blockWorld instanceof ServerWorld blockServer
+                ? Vec3d.ofCenter(blockPos)
+                : player.getEntityPos();
+        ExperienceOrbEntity.spawn(world, position, experience);
     }
 
     private static int[] toIntArray(List<Integer> values) {
@@ -264,8 +355,6 @@ public class CustomGrindstoneScreenHandler extends GenericContainerScreenHandler
         }
         return result;
     }
-
-    // --- vanilla contract ----------------------------------------------------
 
     @Override
     public ItemStack quickMove(PlayerEntity player, int slotIndex) {

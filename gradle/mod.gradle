@@ -1,14 +1,3 @@
-// Shared build logic for every per-Minecraft-version subproject.
-//
-// A subproject only has to provide gradle.properties (+ its own fabric.mod.json):
-//
-//   mc.version             Minecraft version, e.g. 26.3
-//   mc.minecraftDependency value for fabric.mod.json, e.g. "~26.3"
-//   mc.javaRelease         Java release used to compile, e.g. 25
-//   mc.fabricApi           fabric-api version
-//   mc.unobfuscated        true when Minecraft ships deobfuscated (26.x line)
-//   mc.api                 which shared/ source folder to compile, "1.21.11" or "26"
-//   mc.yarn                yarn mappings (only when not unobfuscated)
 
 def prop = { String key, Object fallback = null ->
     project.hasProperty(key) ? project.property(key) : fallback
@@ -21,6 +10,7 @@ def mc = [
         fabricApi    : prop('mc.fabricApi'),
         unobfuscated : prop('mc.unobfuscated', 'false') == 'true',
         api          : prop('mc.api'),
+        triggerApi   : prop('mc.triggerApi', prop('mc.api')),
         yarn         : prop('mc.yarn'),
 ]
 
@@ -41,7 +31,6 @@ dependencies {
     minecraft "com.mojang:minecraft:${mc.version}"
 
     if (mc.unobfuscated) {
-        // No mappings configuration exists for deobfuscated Minecraft.
         implementation "net.fabricmc:fabric-loader:${rootProject.property('loader_version')}"
         implementation "net.fabricmc.fabric-api:fabric-api:${mc.fabricApi}"
     } else {
@@ -51,17 +40,19 @@ dependencies {
     }
 }
 
-// --- shared sources ---------------------------------------------------------
-// `mc.api` picks the folder under shared/ that matches this Minecraft line. Keeping the
-// version specific code in small dedicated classes (see GlassPanes) lets one folder serve a
-// whole line of versions.
 def shared = rootProject.file('shared')
 def sharedPath = { String path -> new File(shared, path) }
 
 sourceSets.main.java.srcDirs += ['common/java', "${mc.api}/java"].collect { sharedPath(it) }
 sourceSets.main.resources.srcDir sharedPath("${mc.api}/resources")
 
-// --- toolchain / packaging --------------------------------------------------
+// The advancement criterion API moved between Minecraft releases, so every distinct flavour of it
+// lives in its own source set that only the versions speaking it add to the compilation.
+if (mc.triggerApi != mc.api) {
+    sourceSets.main.java.srcDir sharedPath("${mc.triggerApi}/java")
+    sourceSets.main.resources.srcDir sharedPath("${mc.triggerApi}/resources")
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(mc.javaRelease)

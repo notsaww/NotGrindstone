@@ -30,7 +30,7 @@ public class GrindstoneBlockMixin {
 
             @Override
             public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
-                return new CustomGrindstoneScreenHandler(syncId, playerInventory);
+                return new CustomGrindstoneScreenHandler(syncId, playerInventory, level, pos.immutable());
             }
         });
     }

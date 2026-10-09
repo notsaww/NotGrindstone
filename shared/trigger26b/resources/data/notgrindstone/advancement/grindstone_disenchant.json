@@ -1,0 +1,28 @@
+{
+  "parent": "minecraft:story/smelt_iron",
+  "criteria": {
+    "disenchanted": {
+      "conditions": {
+        "count": 1
+      },
+      "trigger": "notgrindstone:disenchanted"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.notgrindstone.grindstone_disenchant.description"
+    },
+    "icon": {
+      "id": "minecraft:grindstone"
+    },
+    "title": {
+      "translate": "advancements.notgrindstone.grindstone_disenchant.title"
+    }
+  },
+  "requirements": [
+    [
+      "disenchanted"
+    ]
+  ],
+  "sends_telemetry_event": true
+}
