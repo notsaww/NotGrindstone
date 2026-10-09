@@ -222,12 +222,6 @@ public final class GrindstoneHolder implements InventoryHolder {
         }
     }
 
-    /**
-     * Vanilla turns an enchanted book back into a plain book once its last stored enchantment is
-     * gone, the overhauled grindstone has to do the same.
-     *
-     * @return the replacement stack, or {@code null} when the item has to stay as it is
-     */
     private static ItemStack toBookIfSpent(ItemStack input, ItemMeta meta) {
         if (input.getType() != Material.ENCHANTED_BOOK || meta.hasEnchants()) {
             return null;
