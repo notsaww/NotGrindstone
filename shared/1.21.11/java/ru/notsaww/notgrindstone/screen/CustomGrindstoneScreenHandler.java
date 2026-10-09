@@ -45,10 +45,10 @@ public class CustomGrindstoneScreenHandler extends GenericContainerScreenHandler
     private static final TooltipDisplayComponent NO_TOOLTIP = new TooltipDisplayComponent(true,
             LinkedHashSet.<ComponentType<?>>newLinkedHashSet(0));
 
-    /**
+    **
      * {@code LevelEvents.GRINDSTONE_USE}, the very same level event vanilla fires so the client
      * plays {@code block.grindstone.use} itself.
-     */
+     *
     private static final int GRINDSTONE_USE_EVENT = 1042;
 
     private final SimpleInventory containerInventory;
@@ -277,10 +277,6 @@ public class CustomGrindstoneScreenHandler extends GenericContainerScreenHandler
         refresh();
     }
 
-    /**
-     * Reads the levels straight off the item so the payout can never depend on a stale view of the
-     * enchantment slots.
-     */
     private static int[] levelsOf(ItemEnchantmentsComponent enchantments, ItemEnchantmentsComponent storedEnchantments) {
         List<Integer> levels = new ArrayList<>();
         collectLevels(enchantments, levels);
@@ -294,10 +290,6 @@ public class CustomGrindstoneScreenHandler extends GenericContainerScreenHandler
         }
     }
 
-    /**
-     * Vanilla turns an enchanted book back into a plain book once its last stored enchantment is
-     * gone, the overhauled grindstone has to do the same.
-     */
     private static ItemStack toBookIfSpent(ItemStack stack) {
         if (!stack.isOf(Items.ENCHANTED_BOOK)) {
             return stack;
@@ -325,8 +317,6 @@ public class CustomGrindstoneScreenHandler extends GenericContainerScreenHandler
     }
 
     private void playUseSound(PlayerEntity player) {
-        // Vanilla fires level event 1042 here, which is the only path on which the client actually
-        // plays block.grindstone.use itself.
         if (blockPos != null && blockWorld instanceof ServerWorld blockServer) {
             blockServer.syncWorldEvent(null, GRINDSTONE_USE_EVENT, blockPos, 0);
             return;
